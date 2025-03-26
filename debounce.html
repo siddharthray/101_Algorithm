@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debounce</title>
+</head>
+<body>
+
+<h2>Debounce</h2>
+<input type="text" id="input" oninput="printOutput()">
+<p id="output"></p>
+<script>
+    // var timeoutId;
+    // function debounceFunction() {
+    //     clearTimeout(timeoutId);
+    //     timeoutId = setTimeout(function(){
+    //         let inputValue = document.getElementById('input').value;
+    //         document.getElementById('output').innerText = inputValue;
+    //     }, 2000)
+    // }
+
+    function debounce(fn, delay) {
+            let timeoutId;
+            return function (...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    fn.apply(this, args);
+                }, delay);
+            }
+        }
+
+   // Create the debounced function once, outside the event handler
+    const debouncedFunction = debounce(function () {
+        let inputValue = document.getElementById('input').value;
+        document.getElementById('output').innerText = inputValue;
+    }, 2000);
+
+     function printOutput() {
+       debouncedFunction();
+    }
+
+    
+
+    
+
+</script>
+    
+</body>
+</html>
