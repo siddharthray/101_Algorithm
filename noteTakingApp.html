@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .todo-container {
+            margin-top: 20px;
+        }
+        .input-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        #taskInput {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 4px 0 0 4px;
+        }
+        #addTaskBtn {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            font-size: 16px;
+            border: none;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+        }
+        #addTaskBtn:hover {
+            background-color: #45a049;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px 15px;
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        li.completed .task-text {
+            text-decoration: line-through;
+            color: #888;
+        }
+        .task-text {
+            flex: 1;
+            cursor: pointer;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Todo List</h1>
+    
+    <div class="todo-container">
+        <div class="input-container">
+            <input type="text" id="taskInput" placeholder="Add a new task...">
+            <button id="addTaskBtn">Add</button>
+        </div>
+        
+        <ul id="taskList"></ul>
+    </div>
+
+    <script>
+        // DOM Elements
+        const taskInput = document.getElementById('taskInput');
+        const addTaskBtn = document.getElementById('addTaskBtn');
+        const taskList = document.getElementById('taskList');
+        
+        // Array to store tasks
+        let tasks = [];
+        
+        // Load tasks from localStorage on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedTasks = localStorage.getItem('tasks');
+            if (storedTasks) {
+                tasks = JSON.parse(storedTasks);
+                renderTasks();
+            }
+        });
+        
+        // Function to save tasks to localStorage
+        function saveTasks() {
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+        
+        // Function to render tasks in the UI
+        function renderTasks() {
+            taskList.innerHTML = '';
+            
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                if (task.completed) {
+                    li.classList.add('completed');
+                }
+                
+                const taskText = document.createElement('span');
+                taskText.classList.add('task-text');
+                taskText.textContent = task.text;
+                
+                // Using template literal for the HTML content
+                const deleteBtn = document.createElement('button');
+                deleteBtn.classList.add('delete-btn');
+                deleteBtn.textContent = 'Delete';
+                
+                // Event listeners attached properly
+                taskText.addEventListener('click', () => toggleTaskCompletion(index));
+                deleteBtn.addEventListener('click', () => deleteTask(index));
+                
+                li.appendChild(taskText);
+                li.appendChild(deleteBtn);
+                taskList.appendChild(li);
+            });
+        }
+        
+        // Alternative rendering using template literals but with event delegation
+        // This avoids attaching methods to the window object
+        function renderTasksWithTemplates() {
+            // Create the HTML string using template literals
+            const tasksHTML = tasks.map((task, index) => `
+                <li class="${task.completed ? 'completed' : ''}" data-index="${index}">
+                    <span class="task-text" data-action="toggle">${task.text}</span>
+                    <button class="delete-btn" data-action="delete">Delete</button>
+                </li>
+            `).join('');
+            
+            taskList.innerHTML = tasksHTML;
+            
+            // Add event delegation
+            taskList.addEventListener('click', handleTaskAction);
+        }
+        
+        // Event delegation handler
+        function handleTaskAction(event) {
+            const target = event.target;
+            if (!target.dataset.action) return;
+            
+            const li = target.closest('li');
+            const index = parseInt(li.dataset.index);
+            
+            if (target.dataset.action === 'toggle') {
+                toggleTaskCompletion(index);
+            } else if (target.dataset.action === 'delete') {
+                deleteTask(index);
+            }
+        }
+        
+        // Function to add a new task
+        function addTask() {
+            const text = taskInput.value.trim();
+            
+            if (text !== '') {
+                tasks.push({
+                    text,
+                    completed: false
+                });
+                
+                taskInput.value = '';
+                saveTasks();
+                renderTasks(); // Or use renderTasksWithTemplates();
+            }
+        }
+        
+        // Function to toggle task completion
+        function toggleTaskCompletion(index) {
+            tasks[index].completed = !tasks[index].completed;
+            saveTasks();
+            renderTasks(); // Or use renderTasksWithTemplates();
+        }
+        
+        // Function to delete a task
+        function deleteTask(index) {
+            tasks.splice(index, 1);
+            saveTasks();
+            renderTasks(); // Or use renderTasksWithTemplates();
+        }
+        
+        // Event listeners
+        addTaskBtn.addEventListener('click', addTask);
+        
+        // Add task when Enter key is pressed
+        taskInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                addTask();
+            }
+        });
+    </script>
+</body>
+</html>

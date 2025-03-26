@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Note Taking Application</title>
+  </head>
+  <body>
+    <h1>Note Taking Application</h1>
+    <input type="text" id="noteInput" placeholder="Enter a note" />
+    <button id="addNoteBtn">Add Note</button>
+
+    <div class="notes-container">
+      <ul id="notesList"></ul>
+    </div>
+
+    <script>
+      let notes = [];
+      try {
+        const storedNotes = localStorage.getItem("notes");
+        if (storedNotes) {
+          notes = JSON.parse(storedNotes);
+        }
+      } catch (error) {
+        console.error("Error loading notes from localStorage:", error);
+        notes = [];
+      }
+      const noteInput = document.getElementById("noteInput");
+      const addNoteBtn = document.getElementById("addNoteBtn");
+      const notesList = document.getElementById("notesList");
+      const deleteListBtn = document.getElementById("deleteListItem");
+
+      // Initial render
+      renderNotes();
+
+      addNoteBtn.addEventListener("click", () => {
+        if (noteInput.value.trim() !== "") {
+          addNote();
+          noteInput.value = "";
+          renderNotes();
+        }
+      });
+
+      function renderNotes() {
+        const renderHTML = notes
+          .map((note) => {
+            return `
+                <li class="note">
+                    ${note.text}
+                    <button class="deleteListBtn" data-id="${note.id}">Delete</button>
+                </li>
+            `;
+          })
+          .join("");
+
+        notesList.innerHTML = renderHTML;
+
+        // Add event listeners to all delete buttons
+        document.querySelectorAll(".deleteListBtn").forEach((button) => {
+          button.addEventListener("click", (e) => {
+            const id = parseInt(e.target.getAttribute("data-id"));
+            deleteNote(id);
+          });
+        });
+      }
+
+      function addNote() {
+        const note = {
+          id: Date.now(),
+          text: noteInput.value,
+          completed: false,
+        };
+        notes.push(note);
+        saveNote(notes);
+      }
+
+      function saveNote() {
+        localStorage.setItem("notes", JSON.stringify(notes));
+      }
+
+      noteInput.addEventListener("keypress", (e) => {
+        if (e.key === "Enter" && noteInput.value.trim() !== "") {
+          addNote();
+          noteInput.value = "";
+          renderNotes();
+        }
+      });
+
+      function deleteNote(id) {
+        notes = notes.filter((note) => note.id !== id);
+        saveNote(notes);
+        renderNotes();
+      }
+    </script>
+  </body>
+</html>

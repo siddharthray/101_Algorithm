@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Date Range Picker</title>
+<script>
+function generateDateArray() {
+  var checkInDate = new Date(document.getElementById('checkIn').value + 'T00:00:00');
+  var checkOutDate = new Date(document.getElementById('checkOut').value + 'T00:00:00');
+  var dateArray = [];
+
+  // Adjust for the timezone offset to ensure dates are correct for the user's timezone
+  checkInDate.setMinutes(checkInDate.getMinutes() + checkInDate.getTimezoneOffset());
+  checkOutDate.setMinutes(checkOutDate.getMinutes() + checkOutDate.getTimezoneOffset());
+
+  // Adjust the checkOutDate to include the end of the day
+//   checkOutDate.setDate(checkOutDate.getDate() + 1);
+
+  while (checkInDate <= checkOutDate) {
+    // Format date as 'YYYY-MM-DD' without altering for timezone
+    dateArray.push(checkInDate.toISOString().split('T')[0]);
+    checkInDate.setDate(checkInDate.getDate() + 1); // Increment day by 1
+  }
+
+  console.log(dateArray); // Log to console
+}
+</script>
+</head>
+<body>
+
+<h2>Date Range Picker</h2>
+
+<label for="checkIn">Check-in Date:</label>
+<input type="date" id="checkIn" name="checkIn"><br><br>
+
+<label for="checkOut">Check-out Date:</label>
+<input type="date" id="checkOut" name="checkOut"><br><br>
+
+<button onclick="generateDateArray()">Submit</button>
+
+</body>
+</html>
